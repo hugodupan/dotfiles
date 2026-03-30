@@ -41,16 +41,40 @@ function dsave {
 }
 
 function fcd {
-    $selected = Get-ChildItem -Path "C:\git" -Directory -Recurse -Depth 2 -ErrorAction SilentlyContinue |
-        Select-Object -ExpandProperty FullName |
-        fzf --prompt="Navegar para> " --height=40% --border
+    $selected = fd --type d --max-depth 3 . "C:\git" |
+        fzf --prompt="📁 Navegar para> " `
+            --height=80% --layout=reverse --border=rounded `
+            --preview "git -C {} log --oneline -5 2>$null || dir {}" `
+            --preview-window=right:50% `
+            --bind "ctrl-r:reload(fd --type d --max-depth 3 . C:\git)"
+
+    if ($selected) { Set-Location $selected }
+}
+
+function fcoder {
+    $selected = fd --type d --max-depth 1 . "C:\git" |
+        fzf --prompt="💻 Abrir no VSCode> " `
+            --height=80% --layout=reverse --border=rounded `
+            --preview "git -C {} log --oneline -10 2>$null" `
+            --preview-window=right:50% `
+            --bind "ctrl-r:reload(fd --type d --max-depth 1 . C:\git)"
+
+    if ($selected) { code $selected }
+}
+
+function fvs {
+    $selected = fd --glob "*.sln" "C:\git" |
+        fzf --prompt="🔷 Abrir no Visual Studio> " `
+            --height=80% --layout=reverse --border=rounded `
+            --preview "echo {} | Split-Path -Parent | % { git -C `$_ log --oneline -5 2>null }" `
+            --bind "ctrl-r:reload(fd --glob *.sln C:\git)"
 
     if ($selected) {
-        Set-Location $selected
+        & "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\devenv.exe" $selected
     }
 }
 
-function gitcmp {
+
     $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH","User")
     $branch = "master"
 
@@ -75,21 +99,4 @@ function gitcmp {
 }
 
 
-    $selected = Get-ChildItem -Path "C:\git" -Filter "*.sln" -Recurse -ErrorAction SilentlyContinue |
-        Select-Object -ExpandProperty FullName |
-        fzf --prompt="Abrir no Visual Studio> " --height=40% --border
-
-    if ($selected) {
-        & "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\devenv.exe" $selected
-    }
-}
-
-function fcoder {
-    $selected = Get-ChildItem -Path "C:\git" -Directory -Depth 1 |
-        Select-Object -ExpandProperty FullName |
-        fzf --prompt="Abrir no VSCode> " --height=40% --border --preview "git -C {} log --oneline -5 2>$null"
-
-    if ($selected) {
-        code $selected
-    }
-}
+function gitcmp {
