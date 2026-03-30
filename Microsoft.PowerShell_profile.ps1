@@ -1,5 +1,10 @@
 $env:DOTFILES = "C:\dotfiles"
 
+# Sugestões baseadas no histórico
+Set-PSReadLineOption -PredictionSource History
+Set-PSReadLineOption -PredictionViewStyle ListView
+Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
+
 function dsave {
     # Copia o perfil atual para o repositório dotfiles
     Copy-Item $PROFILE "$env:DOTFILES\Microsoft.PowerShell_profile.ps1" -Force
