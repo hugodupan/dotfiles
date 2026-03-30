@@ -5,6 +5,10 @@ Set-PSReadLineOption -PredictionSource History
 Set-PSReadLineOption -PredictionViewStyle ListView
 Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
 
+# Oh My Posh - prompt com status do git colorido
+$env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH","User")
+oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH\jandedobbeleer.omp.json" | Invoke-Expression
+
 function dsave {
     # Copia o perfil atual para o repositório dotfiles
     Copy-Item $PROFILE "$env:DOTFILES\Microsoft.PowerShell_profile.ps1" -Force
