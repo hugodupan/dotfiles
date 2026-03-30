@@ -40,6 +40,16 @@ function dsave {
     Pop-Location
 }
 
+function fcd {
+    $selected = Get-ChildItem -Path "C:\git" -Directory -Recurse -Depth 2 -ErrorAction SilentlyContinue |
+        Select-Object -ExpandProperty FullName |
+        fzf --prompt="Navegar para> " --height=40% --border
+
+    if ($selected) {
+        Set-Location $selected
+    }
+}
+
 function gitcmp {
     $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH","User")
     $branch = "master"
