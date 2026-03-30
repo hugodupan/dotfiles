@@ -1,0 +1,52 @@
+$env:DOTFILES = "C:\dotfiles"
+
+function dsave {
+    # Copia o perfil atual para o repositório dotfiles
+    Copy-Item $PROFILE "$env:DOTFILES\Microsoft.PowerShell_profile.ps1" -Force
+
+    $git = { param($a) & git $a.Split(" ") 2>&1 }
+    Push-Location $env:DOTFILES
+
+    git add . 2>&1 | Out-Null
+    $status = git status --porcelain 2>&1
+    if (-not $status) {
+        Write-Host "⏭ Nenhuma alteração para salvar." -ForegroundColor Yellow
+        Pop-Location; return
+    }
+
+    $msg = Read-Host "Mensagem do commit (Enter para usar 'Update dotfiles')"
+    if (-not $msg) { $msg = "Update dotfiles" }
+
+    git commit -m $msg 2>&1 | Out-Null
+    $token = [System.Environment]::GetEnvironmentVariable("DOTFILES_TOKEN", "User")
+    if (-not $token) {
+        Write-Host "❌ Variável DOTFILES_TOKEN não definida. Execute: [System.Environment]::SetEnvironmentVariable('DOTFILES_TOKEN','seu_token','User')" -ForegroundColor Red
+        Pop-Location; return
+    }
+    $remote = "https://hugodupan:$token@github.com/hugodupan/dotfiles.git"
+    git remote set-url origin $remote 2>&1 | Out-Null
+    git push origin main 2>&1 | Out-Null
+
+    Write-Host "✅ Dotfiles salvos no GitHub!" -ForegroundColor Green
+    Pop-Location
+}
+
+function fvs {
+    $selected = Get-ChildItem -Path "C:\git" -Filter "*.sln" -Recurse -ErrorAction SilentlyContinue |
+        Select-Object -ExpandProperty FullName |
+        fzf --prompt="Abrir no Visual Studio> " --height=40% --border
+
+    if ($selected) {
+        & "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\devenv.exe" $selected
+    }
+}
+
+function fcoder {
+    $selected = Get-ChildItem -Path "C:\git" -Directory -Depth 1 |
+        Select-Object -ExpandProperty FullName |
+        fzf --prompt="Abrir no VSCode> " --height=40% --border --preview "git -C {} log --oneline -5 2>$null"
+
+    if ($selected) {
+        code $selected
+    }
+}
