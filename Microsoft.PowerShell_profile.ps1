@@ -75,6 +75,7 @@ function fvs {
 }
 
 
+function gitmaster {
     $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH","User")
     $branch = "master"
 
@@ -93,10 +94,32 @@ function fvs {
     git checkout $branch --quiet
 
     Write-Host "⬇ Puxando última versão do servidor..." -ForegroundColor Cyan
-    git rebase "origin/$branch"
+    git merge "origin/$branch"
 
     Write-Host "✅ Pronto! Você está na '$branch' com a versão mais recente." -ForegroundColor Green
 }
 
 
 function gitcmp {
+    $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH","User")
+    $branch = "master"
+
+    if (!(Test-Path ".git")) {
+        Write-Host "❌ Não é um repositório git." -ForegroundColor Red
+        return
+    }
+
+    Write-Host "📦 Guardando alterações locais (stash)..." -ForegroundColor Cyan
+    git stash push --include-untracked --message "stash antes de ir para $branch" | Out-Null
+
+    Write-Host "🔄 Atualizando referências remotas (fetch)..." -ForegroundColor Cyan
+    git fetch | Out-Null
+
+    Write-Host "🔀 Indo para a branch $branch..." -ForegroundColor Cyan
+    git checkout $branch --quiet
+
+    Write-Host "⬇ Puxando última versão do servidor..." -ForegroundColor Cyan
+    git merge "origin/$branch"
+
+    Write-Host "✅ Pronto! Você está na '$branch' com a versão mais recente." -ForegroundColor Green
+}
