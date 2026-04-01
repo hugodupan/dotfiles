@@ -7,7 +7,7 @@ Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
 
 # Oh My Posh - prompt com status do git colorido
 $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH","User")
-oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH\jandedobbeleer.omp.json" | Invoke-Expression
+oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH\cobalt2.omp.json" | Invoke-Expression
 
 function dsave {
     # Copia o perfil atual para o repositório dotfiles
@@ -55,11 +55,11 @@ function fcoder {
     $selected = fd --type d --max-depth 1 . "C:\git" |
         fzf --prompt="💻 Abrir no VSCode> " `
             --height=80% --layout=reverse --border=rounded `
-            --preview "git -C {} log --oneline -10 2>$null" `
+            --preview "git -C {} log --oneline -10 2>nul || dir {}" `
             --preview-window=right:50% `
             --bind "ctrl-r:reload(fd --type d --max-depth 1 . C:\git)"
 
-    if ($selected) { code $selected }
+    if ($selected) { Set-Location $selected; code $selected }
 }
 
 function fvs {
@@ -70,6 +70,7 @@ function fvs {
             --bind "ctrl-r:reload(fd --glob *.sln C:\git)"
 
     if ($selected) {
+        Set-Location (Split-Path $selected -Parent)
         & "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\devenv.exe" $selected
     }
 }
@@ -123,3 +124,4 @@ function gitcmp {
 
     Write-Host "✅ Pronto! Você está na '$branch' com a versão mais recente." -ForegroundColor Green
 }
+Set-Alias lg lazygit
