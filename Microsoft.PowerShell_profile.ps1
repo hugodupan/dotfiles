@@ -9,6 +9,10 @@ Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
 $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH","User")
 oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH\cobalt2.omp.json" | Invoke-Expression
 
+# NVS - Node Version Switcher
+# Carrega o NVS mas desabilita o menu interativo adicionando a versão default ao PATH primeiro
+$env:PATH = "$env:LOCALAPPDATA\nvs\node\20.12.2\x64;$env:PATH"
+
 function dsave {
     # Copia o perfil atual para o repositório dotfiles
     Copy-Item $PROFILE "$env:DOTFILES\Microsoft.PowerShell_profile.ps1" -Force
